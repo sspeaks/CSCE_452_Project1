@@ -9,19 +9,20 @@
 #include <gl/GLU.h>
 #include <vector>
 #include <iostream>
+#include <cmath>
 using namespace std;
+#define PI 3.14159265358979323846
 
 static int shoulder = 0, elbow = 0, head = 0;
-int randcount = 0;
+
 GLfloat size = .1;
 GLfloat mat[16];
 GLfloat mat2[16];
 GLfloat mat3[16];
-/*
+
 bool calc = false;
-vector<double> v(16);
-int cnt = 0;
-*/
+bool inLoop = false;
+vector<double> v(1, - 10000);
 
 void init(void) 
 {
@@ -31,11 +32,10 @@ void init(void)
 
 void squareBrush(float x, float y)
 {
-
-	float p1[3] = {x +(.5*size), y+(.5*size), 0};
-	float p2[3] = {x +(.5*size), y-(.5*size), 0};
-	float p4[3] = {x -(.5*size), y+(.5*size), 0};
-	float p3[3] = {x -(.5*size), y-(.5*size), 0};
+	float p1[3] = {x +(.75*size), y+(.75*size), 0};
+	float p2[3] = {x +(.75*size), y-(.75*size), 0};
+	float p4[3] = {x -(.75*size), y+(.75*size), 0};
+	float p3[3] = {x -(.75*size), y-(.75*size), 0};
 	glBegin (GL_POLYGON);
 		glVertex3fv(p1);
 		glVertex3fv(p2);
@@ -43,7 +43,18 @@ void squareBrush(float x, float y)
 		glVertex3fv(p4);
 	glEnd();
 	glFlush();
+}
 
+void circle(double x, double y)
+{
+	int radius = 1;
+	double i = 0;
+	double changeInAngle = 0.01;
+	glBegin(GL_POLYGON);
+	for(i = 0; i < 2*PI; i += 0.01){
+		glVertex3f((x+cos(i)*radius), (y+sin(i)*radius), 0.0);
+	}
+	glEnd();
 }
 
 void display(void)
@@ -57,7 +68,6 @@ void display(void)
    glPushMatrix();
 
    //joint 1
-   glTranslatef (0.0, -1.0, 0.0);
    glRotatef ((GLfloat) shoulder, 0.0, 0.0, 1.0);
    glTranslatef (0.0, 1.0, 0.0);
    glPushMatrix();
@@ -67,8 +77,7 @@ void display(void)
    glPopMatrix();
 
    //joint 2
-   
-   glTranslatef (0.0, 0.6250, 0.0);//.6250
+   glTranslatef (0.0, 0.6250, 0.0);
    glRotatef ((GLfloat) elbow, 0.0, 0.0, 1.0);
    glTranslatef (0.0, 0.6250, 0.0);
    glPushMatrix();
@@ -78,7 +87,6 @@ void display(void)
    glPopMatrix();
 
    //3
-   
    glTranslatef (0.0, 0.43750, 0.0);
    glRotatef ((GLfloat) head, 0.0, 0.0, 1.0);
    glTranslatef (0.0, 0.43750, 0.0);
@@ -87,73 +95,35 @@ void display(void)
    glGetFloatv(GL_MODELVIEW_MATRIX,mat3);
    glutSolidCube (1.0);
    glPopMatrix();
-
-   //end effector
-   glTranslatef (0.0, 0.20, 0.0);
-   glTranslatef (0.0, 0.20, 0.0);
-   glPushMatrix();
-   glScalef (0.05, 0.05, 0);
-   glutSolidCube (1.0);
    glPopMatrix();
 
-   glPopMatrix();
-
-   if (randcount == 1){
-   squareBrush(mat[1]*4,mat[1]*4);
-   }
-
-	GLfloat sum[16];
-	GLfloat sum_all[16];
-   for (int i = 0; i < 4; i++){
-	   for (int j = 0; j < 4; j++) {
-		   sum[4*i+j] = 0;
-		   for (int k = 0; k < 4; k++){
-				sum[4*i+j] += mat[4*i+j] * mat2[4*i*j];
-		   }
-	   }
-   }
-    for (int i = 0; i < 4; i++){
-	   for (int j = 0; j < 4; j++) {
-		   sum_all[4*i+j] = 0;
-		   for (int k = 0; k < 4; k++){
-				sum_all[4*i+j] += sum[4*i+j] * mat3[4*i*j];
-		   }
-	   }
-   }
-	for (int i = 0; i < 16; i++){
-		  printf("%f ", sum_all[i]);
-	   }
-	printf("\n");
-  /* 
-  // glGetDoublev(GL_MODELVIEW_MATRIX, MyMatrix);
-   int i, j;
-   
-	//printf("x=%f, y=%f\n",c[0],c[1]);
-
-   GLdouble b[] = {0, 2.5, 0, 1};
-   GLdouble c[(sizeof(b)/sizeof(GLdouble))];
-	GLdouble temp = 0;
-	int count = 0; 
-	for(j = 0; j < sizeof(mat)/sizeof(GLdouble); j++)
+	if(calc)
 	{
-		if(j != 0 && j%4 == 0)
-		{
-			c[count] = temp;
-			temp = 0;
-			count++;
-		}
-		temp += mat[j] * b[j%4];	
+		int spot = 0;
+		while(v.at(spot) != -10000)
+			spot++;
+		if(v.size() - spot <= 2)
+			v.resize(v.size()+2, -10000);
+		v[spot] = mat[4]+mat2[4]+mat3[4];
+		spot++;
+		v[spot] = mat[5]+mat2[5]+mat3[5];
+		
+		calc = false;
 	}
-	squareBrush(c[0],c[1]);
-   
-	for(i = 0; i < 16; i++)
+	squareBrush((mat[4]+mat2[4]+mat3[4]), (mat[5]+mat2[5]+mat3[5]));
+
+	int count = 0;
+	double x_1, y_1;
+	while(v.at(count) != -10000)
 	{
-		if(i%4 == 0)
-			printf("\n");
-		printf("%f,", MyMatrix[i]);
+		x_1 = v.at(count);
+		count++;
+		y_1 = v.at(count);
+		count++;
+		squareBrush(x_1,y_1);
 	}
-	printf("\n");
-	*/
+
+
    glutSwapBuffers();
 }
 
@@ -172,7 +142,7 @@ void keyboard (unsigned char key, int x, int y)
 {
    switch (key) {
 		case 'c':
-	  // calc = true;
+		calc = true;
 		 glutPostRedisplay();
 		 break;
 		case 's':
@@ -199,10 +169,6 @@ void keyboard (unsigned char key, int x, int y)
          head = (head - 1) % 360;
          glutPostRedisplay();
          break;
-		case 'q':
-		  //squareBrush(mat[0],mat[1]);
-		  randcount = 1;
-		  break;
       case 27:
          exit(0);
          break;
@@ -211,24 +177,11 @@ void keyboard (unsigned char key, int x, int y)
    }
 }
 
-void but_cb( Fl_Widget* o, void*  ) {
-   Fl_Button* b=(Fl_Button*)o;
-   b->label("Good job"); //redraw not necessary
-  
-   b->resize(10,150,140,30); //redraw needed
-   b->redraw();
-}
 
 int main(int argc, char** argv)
 {
-	Fl_Window win( 300,200,"Testing" );
+	Fl_Window win( 400,300,"Testing" );
     win.begin();
-       Fl_Button but( 10, 150, 70, 30, "Click me" );
-    but.callback( but_cb );
-   // win.show();
-  //  return Fl::run();
-
-   //glutInit(&argc, argv);
 
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
    glutInitWindowSize (500, 500); 
