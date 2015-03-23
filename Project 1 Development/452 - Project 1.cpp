@@ -1,10 +1,5 @@
 #include "stdafx.h"
 #include <stdlib.h>
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Gl_Window.H>
-#include <FL/Fl_Button.H>
-#include <Fl/gl.h>
 #include <GL/glut.h>
 #include <gl/GLU.h>
 #include <vector>
@@ -26,8 +21,15 @@ vector<double> v(1, - 10000);
 
 void init(void) 
 {
-   glClearColor (0.0, 0.0, 0.0, 0.0);
-   glShadeModel (GL_FLAT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+	glClearDepth(1.0f);                   // Set background depth to farthest
+	glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
+	glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
+	glShadeModel(GL_SMOOTH);   // Enable smooth shading
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  // Nice perspective corrections
+	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
 }
 
 void squareBrush(float x, float y)
@@ -59,42 +61,65 @@ void circle(double x, double y)
 
 void display(void)
 {
-   glClear (GL_COLOR_BUFFER_BIT);
 
    GLdouble MyMatrix[16];
 
-   glMatrixMode(GL_MODELVIEW_MATRIX);
-
-   glPushMatrix();
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
 
    //joint 1
-   glRotatef ((GLfloat) shoulder, 0.0, 0.0, 1.0);
-   glTranslatef (0.0, 1.0, 0.0);
+   glColor3f(1.0f, 1.0f, 1.0f);
+   glTranslatef(0.0f, 0.0f, -7.0f);  // Move  into the screen
+   
    glPushMatrix();
-   glScalef (0.2, 1.5, 0);
-   glGetFloatv(GL_MODELVIEW_MATRIX,mat);
-   glutSolidCube (1.0);
-   glPopMatrix();
-
+   glTranslatef(0.0f, -1.0f, 0.0f);
+   glRotatef((GLfloat)shoulder, 0.0f, 0.0f, 1.0f);
+   
+   glTranslatef(0.0f, +1.0f, 0.0f);
+   
+   
+   
    //joint 2
-   glTranslatef (0.0, 0.6250, 0.0);
-   glRotatef ((GLfloat) elbow, 0.0, 0.0, 1.0);
-   glTranslatef (0.0, 0.6250, 0.0);
+   
    glPushMatrix();
-   glScalef (0.2, 1.0, 0);
-   glGetFloatv(GL_MODELVIEW_MATRIX,mat2);
-   glutSolidCube (1.0);
-   glPopMatrix();
-
+   glTranslatef(0.0f, 1.66f, 0.0f);
+   glTranslatef(0.0f, -.66f, 0.0f);
+   glRotatef((GLfloat)elbow, 0.0, 0.0, 1.0);
+   
+   glTranslatef(0.0f, .66f, 0.0f);
+  
+   
+   
+   
+   
    //3
-   glTranslatef (0.0, 0.43750, 0.0);
-   glRotatef ((GLfloat) head, 0.0, 0.0, 1.0);
-   glTranslatef (0.0, 0.43750, 0.0);
    glPushMatrix();
-   glScalef (0.2, 0.75, 0);
-   glGetFloatv(GL_MODELVIEW_MATRIX,mat3);
-   glutSolidCube (1.0);
+	
+   glTranslatef (0.0f, 1.06f, 0.0f);
+   glTranslatef(0.0f, -.4f, 0.0f);
+   glRotatef ((GLfloat) head, 0.0, 0.0, 1.0);
+   
+   glTranslatef(0.0f, +.4f, 0.0f);
+   glGetFloatv(GL_MODELVIEW_MATRIX, mat3);
+   glScalef (0.1, 0.4f, .1f);
+   glutSolidSphere (1.0,15,15);
+   
+   
+  
+   
    glPopMatrix();
+   glGetFloatv(GL_MODELVIEW_MATRIX, mat2);
+   glScalef(.1f, 0.66f, 0.1f);
+   glutSolidSphere(1.0, 15, 15);
+  
+   
+   glPopMatrix();
+   glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+   glScalef(.1f, 1.0f, 0.1f);
+   glutSolidSphere(1.0, 15, 15);
+   
+   
    glPopMatrix();
 
 	if(calc)
@@ -104,13 +129,12 @@ void display(void)
 			spot++;
 		if(v.size() - spot <= 2)
 			v.resize(v.size()+2, -10000);
-		v[spot] = mat[4]+mat2[4]+mat3[4];
+		v[spot] = 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4];
 		spot++;
-		v[spot] = mat[5]+mat2[5]+mat3[5];
+		v[spot] = 2.0f*mat[5] + .66f*2* mat2[5] + .4*2 *mat3[5];
 		
 		calc = false;
 	}
-	squareBrush((mat[4]+mat2[4]+mat3[4]), (mat[5]+mat2[5]+mat3[5]));
 
 	int count = 0;
 	double x_1, y_1;
@@ -120,9 +144,14 @@ void display(void)
 		count++;
 		y_1 = v.at(count);
 		count++;
-		squareBrush(x_1,y_1);
+		glPushMatrix();
+		glTranslatef(0.0f, -1.0f, 0);
+		glTranslatef(x_1, y_1, 0);
+		glScalef(0.1f, 0.1f, 0.1f);
+		glutSolidSphere(1.0, 15, 15);
+		glPopMatrix();
+		
 	}
-
 
    glutSwapBuffers();
 }
@@ -180,29 +209,19 @@ void keyboard (unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
-<<<<<<< HEAD:Project 1 Development/452 - Project 1.cpp
-	Fl_Window *window = new Fl_Window(300,180);
-	window ->show(argc, argv);
-   glutInit(&argc, argv);
-=======
-	Fl_Window win( 400,300,"Testing" );
-    win.begin();
-
->>>>>>> 535bbcee194159f5bb2e2c62d71c7cd022d8d4af:452 - Project 1.cpp
-   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
-   glutInitWindowSize (500, 500); 
-   glutInitWindowPosition (100, 100);
-
-   win.end();
-
-   glutCreateWindow (argv[0]);
-   init ();
+	glutInit(&argc, argv);
+   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+   glutInitWindowSize(800, 600);
+   glutInitWindowPosition(100, 100);
+   glutCreateWindow("OpenGL Test");
+  
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
+   init();
+   
    glutKeyboardFunc(keyboard);
 
    glutMainLoop();
 
-   return Fl::run();
    return 0;
 }
