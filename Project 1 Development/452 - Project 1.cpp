@@ -7,13 +7,18 @@
 #include <cmath>
 using namespace std;
 #define PI 3.14159265358979323846
+int refreshMills = 15;
 
 static int shoulder = 0, elbow = 0, head = 0;
+static int goalS = 0, goalE = 0, goalH = 0;
 
 GLfloat size = .1;
 GLfloat mat[16];
 GLfloat mat2[16];
 GLfloat mat3[16];
+
+GLfloat drawdot_x = 0.0;
+GLfloat drawdot_y = 0.0;
 
 bool calc = false;
 bool inLoop = false;
@@ -130,6 +135,7 @@ void display(void)
 		if(v.size() - spot <= 2)
 			v.resize(v.size()+2, -10000);
 		v[spot] = 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4];
+		cout << "Drawn at " << 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4] << " " << 2.0f*mat[5] + .66f * 2 * mat2[5] + .4 * 2 * mat3[5] << endl;
 		spot++;
 		v[spot] = 2.0f*mat[5] + .66f*2* mat2[5] + .4*2 *mat3[5];
 		
@@ -153,6 +159,14 @@ void display(void)
 		
 	}
 
+	glColor3f(.7f, 0.0f, 0.0f);
+	glPushMatrix();
+	glTranslatef(0.0f, -1.0f, 0);
+	glTranslatef(drawdot_x, drawdot_y, 0);
+	glScalef(0.1f, 0.1f, 0.1f);
+	glutSolidSphere(1.0, 15, 15);
+	glPopMatrix();
+
    glutSwapBuffers();
 }
 
@@ -166,38 +180,151 @@ void reshape (int w, int h)
    glLoadIdentity();
    glTranslatef (0.0, 0.0, -5.0);
 }
+void timer(int value) {
+	if (shoulder != goalS)
+	{
+		if (shoulder - goalS < shoulder)
+			shoulder = (shoulder + 1) % 360;
+		else
+			shoulder = (shoulder - 1) % 360;
+	}
+	if (elbow != goalE)
+	{
+		if (elbow - goalE < elbow)
+			elbow = (elbow + 1) % 360;
+		else
+		elbow = (elbow - 1) % 360;
+	}
+	if (head != goalH)
+	{
+		if (head - goalH < head)
+			head = (head + 1) % 360;
+		else
+			head = (head - 1) % 360;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(refreshMills, timer, 0);
+}
+
+double getDistance(float x, float y, double angle1, double angle2, double angle3)
+{
+	
+	double xdist = pow(2 * cos(angle1*PI / 180) + 1.32 * cos(angle2*PI / 180) + 0.8 * cos(angle3*PI / 180) - x, 2);
+	
+	double ydist = pow(2 * sin(angle1*PI / 180) + 1.32 * sin(angle2*PI / 180) + 0.8 * sin(angle3*PI / 180) - y, 2);
+	
+	return sqrt(xdist + ydist);
+}
+
+void heuristicInverseK(float x, float y)
+{
+	double angle1 = shoulder + 90;
+	double angle2 = angle1 + elbow;
+	double angle3 = angle2 + head;
+	double minimumDistance;
+	double lastDistance = -1;
+	
+	minimumDistance = getDistance(x, y, angle1, angle2, angle3);
+
+	double curDist = minimumDistance;
+	while (minimumDistance != lastDistance)
+	{
+		lastDistance = minimumDistance;
+		
+		while (curDist == minimumDistance)
+		{
+			if ((curDist = getDistance(x, y, angle1, angle2, angle3 + 1)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle3 += 1;
+			}
+			else if ((curDist = getDistance(x, y, angle1, angle2, angle3 - 1)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle3 -= 1;
+			}
+		}
+		curDist = minimumDistance;
+		while (curDist == minimumDistance)
+		{
+			if ((curDist = getDistance(x, y, angle1, angle2 + 1, angle3)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle2 += 1;
+			}
+			else if ((curDist = getDistance(x, y, angle1, angle2 - 1, angle3)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle2 -= 1;
+			}
+		}
+		curDist = minimumDistance;
+		while (curDist == minimumDistance)
+		{
+			if ((curDist = getDistance(x, y, angle1 + 1, angle2, angle3)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle1 += 1;
+			}
+			else if ((curDist = getDistance(x, y, angle1 - 1, angle2, angle3)) < minimumDistance)
+			{
+				minimumDistance = curDist;
+				angle1 -= 1;
+			}
+		}
+	}
+	goalS = angle1 - 90;
+	goalE = angle2 - angle1;
+	goalH = angle3 - angle2;
+	
+	
+}
+
+void processMouse(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		heuristicInverseK(drawdot_x, drawdot_y);
+	}
+
+}
 
 void keyboard (unsigned char key, int x, int y)
 {
    switch (key) {
 		case 'c':
 		calc = true;
-		 glutPostRedisplay();
 		 break;
 		case 's':
          shoulder = (shoulder + 1) % 360;
-         glutPostRedisplay();
          break;
 		case 'S':
          shoulder = (shoulder - 1) % 360;
-         glutPostRedisplay();
          break;
 		case 'e':
          elbow = (elbow + 1) % 360;
-         glutPostRedisplay();
          break;
 		case 'E':
          elbow = (elbow - 1) % 360;
-         glutPostRedisplay();
          break;
 		case 'h':
          head = (head + 1) % 360;
-         glutPostRedisplay();
          break;
 		case 'H':
          head = (head - 1) % 360;
-         glutPostRedisplay();
          break;
+		case 'i':
+			drawdot_y += .05;
+			break;
+		case'j':
+			drawdot_x -= .05;
+			break;
+		case'k':
+			drawdot_y -= .05;
+			break;
+		case 'l':
+			drawdot_x += .05;
+			break;
       case 27:
          exit(0);
          break;
@@ -218,8 +345,11 @@ int main(int argc, char** argv)
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    init();
+
+   glutTimerFunc(0, timer, 0);
    
    glutKeyboardFunc(keyboard);
+   glutMouseFunc(processMouse);
 
    glutMainLoop();
 
