@@ -181,26 +181,188 @@ void reshape (int w, int h)
    glTranslatef (0.0, 0.0, -5.0);
 }
 void timer(int value) {
-	if (shoulder != goalS)
+	if (goalS != shoulder)
 	{
-		if (shoulder - goalS < shoulder)
-			shoulder = (shoulder + 1) % 360;
-		else
-			shoulder = (shoulder - 1) % 360;
+		if (goalS >= 0 && shoulder >= 0)
+		{
+			if (shoulder - goalS < shoulder)
+			{
+				if ((shoulder - goalS) % 180 >= 1)
+				{
+					shoulder = (shoulder - 1) % 360;
+				}
+				else
+					shoulder = (shoulder + 1) % 360;
+			}
+			else
+			{
+				if ((goalS - shoulder) % 180 >= 1)
+					shoulder = (shoulder + 1) % 360;
+				else
+					shoulder = (shoulder - 1) % 360;
+			}
+		}
+		if (goalS >= 0 && shoulder < 0)
+		{
+			if (abs((shoulder - goalS)) % 180 >= 1)
+			{
+				shoulder = (shoulder - 1) % 360;
+			}
+			else
+				shoulder = (shoulder + 1) % 360;
+
+		}
+		if (goalS < 0 && shoulder >= 0)
+		{
+			if (abs((shoulder - goalS)) % 180 >= 1)
+			{
+				shoulder = (shoulder + 1) % 360;
+			}
+			else
+				shoulder = (shoulder - 1) % 360;
+
+		}
+		if (goalS < 0 && shoulder < 0)
+		{
+			if (shoulder - goalS < 0)
+			{
+				if (abs((shoulder - goalS)) % 180 >= 1)
+				{
+					shoulder = (shoulder - 1) % 360;
+				}
+				else
+					shoulder = (shoulder + 1) % 360;
+			}
+			else
+			{
+				if (abs(goalS - shoulder) % 180 > 1)
+					shoulder = (shoulder + 1) % 360;
+				else
+					shoulder = (shoulder - 1) % 360;
+			}
+		}
 	}
-	if (elbow != goalE)
+	if (goalE != elbow)
 	{
-		if (elbow - goalE < elbow)
-			elbow = (elbow + 1) % 360;
-		else
-		elbow = (elbow - 1) % 360;
+		if (goalE >= 0 && elbow >= 0)
+		{
+			if (elbow - goalE < elbow)
+			{
+				if ((elbow - goalE) % 180 >= 1)
+				{
+					elbow = (elbow - 1) % 360;
+				}
+				else
+					elbow = (elbow + 1) % 360;
+			}
+			else
+			{
+				if ((goalE - elbow) % 180 >= 1)
+					elbow = (elbow + 1) % 360;
+				else
+					elbow = (elbow - 1) % 360;
+			}
+		}
+		if (goalE >= 0 && elbow < 0)
+		{
+			if (abs((elbow - goalE)) % 180 >= 1)
+			{
+				elbow = (elbow - 1) % 360;
+			}
+			else
+				elbow = (elbow + 1) % 360;
+
+		}
+		if (goalE < 0 && elbow >= 0)
+		{
+			if (abs((elbow - goalE)) % 180 >= 1)
+			{
+				elbow = (elbow + 1) % 360;
+			}
+			else
+				elbow = (elbow - 1) % 360;
+
+		}
+		if (goalE < 0 && elbow < 0)
+		{
+			if (elbow - goalE < 0)
+			{
+				if (abs((elbow - goalE)) % 180 >= 1)
+				{
+					elbow = (elbow - 1) % 360;
+				}
+				else
+					elbow = (elbow + 1) % 360;
+			}
+			else
+			{
+				if (abs(goalE - elbow) % 180 > 1)
+					elbow = (elbow + 1) % 360;
+				else
+					elbow = (elbow - 1) % 360;
+			}
+		}
 	}
-	if (head != goalH)
+	if (goalH != head)
 	{
-		if (head - goalH < head)
-			head = (head + 1) % 360;
-		else
-			head = (head - 1) % 360;
+		if (goalH >= 0 && head >= 0)
+		{
+			if (head - goalH < head)
+			{
+				if ((head - goalH) % 180 >= 1)
+				{
+					head = (head - 1) % 360;
+				}
+				else
+					head = (head + 1) % 360;
+			}
+			else
+			{
+				if ((goalH - head) % 180 >= 1)
+					head = (head + 1) % 360;
+				else
+					head = (head - 1) % 360;
+			}
+		}
+		if (goalH >= 0 && head < 0)
+		{
+			if (abs((head - goalH)) % 180 >= 1)
+			{
+				head = (head - 1) % 360;
+			}
+			else
+				head = (head + 1) % 360;
+
+		}
+		if (goalH < 0 && head >= 0)
+		{
+			if (abs((head - goalH)) % 180 >= 1)
+			{
+				head = (head + 1) % 360;
+			}
+			else
+				head = (head - 1) % 360;
+
+		}
+		if (goalH < 0 && head < 0)
+		{
+			if (head - goalH < 0)
+			{
+				if (abs((head - goalH)) % 180 >= 1)
+				{
+					head = (head - 1) % 360;
+				}
+				else
+					head = (head + 1) % 360;
+			}
+			else
+			{
+				if (abs(goalH - head) % 180 > 1)
+					head = (head + 1) % 360;
+				else
+					head = (head - 1) % 360;
+			}
+		}
 	}
 	glutPostRedisplay();
 	glutTimerFunc(refreshMills, timer, 0);
