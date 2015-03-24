@@ -135,7 +135,7 @@ void display(void)
 		if(v.size() - spot <= 2)
 			v.resize(v.size()+2, -10000);
 		v[spot] = 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4];
-		cout << "Drawn at " << 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4] << " " << 2.0f*mat[5] + .66f * 2 * mat2[5] + .4 * 2 * mat3[5] << endl;
+		//cout << "Drawn at " << 2.0f*mat[4] + .66f * 2 * mat2[4] + .4 * 2 * mat3[4] << " " << 2.0f*mat[5] + .66f * 2 * mat2[5] + .4 * 2 * mat3[5] << endl;
 		spot++;
 		v[spot] = 2.0f*mat[5] + .66f*2* mat2[5] + .4*2 *mat3[5];
 		
@@ -150,6 +150,7 @@ void display(void)
 		count++;
 		y_1 = v.at(count);
 		count++;
+		glColor3f(0.5f, 1.0f, 0.0f);
 		glPushMatrix();
 		glTranslatef(0.0f, -1.0f, 0);
 		glTranslatef(x_1, y_1, 0);
@@ -181,189 +182,7 @@ void reshape (int w, int h)
    glTranslatef (0.0, 0.0, -5.0);
 }
 void timer(int value) {
-	if (goalS != shoulder)
-	{
-		if (goalS >= 0 && shoulder >= 0)
-		{
-			if (shoulder - goalS < shoulder)
-			{
-				if ((shoulder - goalS) % 180 >= 1)
-				{
-					shoulder = (shoulder - 1) % 360;
-				}
-				else
-					shoulder = (shoulder + 1) % 360;
-			}
-			else
-			{
-				if ((goalS - shoulder) % 180 >= 1)
-					shoulder = (shoulder + 1) % 360;
-				else
-					shoulder = (shoulder - 1) % 360;
-			}
-		}
-		if (goalS >= 0 && shoulder < 0)
-		{
-			if (abs((shoulder - goalS)) % 180 >= 1)
-			{
-				shoulder = (shoulder - 1) % 360;
-			}
-			else
-				shoulder = (shoulder + 1) % 360;
-
-		}
-		if (goalS < 0 && shoulder >= 0)
-		{
-			if (abs((shoulder - goalS)) % 180 >= 1)
-			{
-				shoulder = (shoulder + 1) % 360;
-			}
-			else
-				shoulder = (shoulder - 1) % 360;
-
-		}
-		if (goalS < 0 && shoulder < 0)
-		{
-			if (shoulder - goalS < 0)
-			{
-				if (abs((shoulder - goalS)) % 180 >= 1)
-				{
-					shoulder = (shoulder - 1) % 360;
-				}
-				else
-					shoulder = (shoulder + 1) % 360;
-			}
-			else
-			{
-				if (abs(goalS - shoulder) % 180 > 1)
-					shoulder = (shoulder + 1) % 360;
-				else
-					shoulder = (shoulder - 1) % 360;
-			}
-		}
-	}
-	if (goalE != elbow)
-	{
-		if (goalE >= 0 && elbow >= 0)
-		{
-			if (elbow - goalE < elbow)
-			{
-				if ((elbow - goalE) % 180 >= 1)
-				{
-					elbow = (elbow - 1) % 360;
-				}
-				else
-					elbow = (elbow + 1) % 360;
-			}
-			else
-			{
-				if ((goalE - elbow) % 180 >= 1)
-					elbow = (elbow + 1) % 360;
-				else
-					elbow = (elbow - 1) % 360;
-			}
-		}
-		if (goalE >= 0 && elbow < 0)
-		{
-			if (abs((elbow - goalE)) % 180 >= 1)
-			{
-				elbow = (elbow - 1) % 360;
-			}
-			else
-				elbow = (elbow + 1) % 360;
-
-		}
-		if (goalE < 0 && elbow >= 0)
-		{
-			if (abs((elbow - goalE)) % 180 >= 1)
-			{
-				elbow = (elbow + 1) % 360;
-			}
-			else
-				elbow = (elbow - 1) % 360;
-
-		}
-		if (goalE < 0 && elbow < 0)
-		{
-			if (elbow - goalE < 0)
-			{
-				if (abs((elbow - goalE)) % 180 >= 1)
-				{
-					elbow = (elbow - 1) % 360;
-				}
-				else
-					elbow = (elbow + 1) % 360;
-			}
-			else
-			{
-				if (abs(goalE - elbow) % 180 > 1)
-					elbow = (elbow + 1) % 360;
-				else
-					elbow = (elbow - 1) % 360;
-			}
-		}
-	}
-	if (goalH != head)
-	{
-		if (goalH >= 0 && head >= 0)
-		{
-			if (head - goalH < head)
-			{
-				if ((head - goalH) % 180 >= 1)
-				{
-					head = (head - 1) % 360;
-				}
-				else
-					head = (head + 1) % 360;
-			}
-			else
-			{
-				if ((goalH - head) % 180 >= 1)
-					head = (head + 1) % 360;
-				else
-					head = (head - 1) % 360;
-			}
-		}
-		if (goalH >= 0 && head < 0)
-		{
-			if (abs((head - goalH)) % 180 >= 1)
-			{
-				head = (head - 1) % 360;
-			}
-			else
-				head = (head + 1) % 360;
-
-		}
-		if (goalH < 0 && head >= 0)
-		{
-			if (abs((head - goalH)) % 180 >= 1)
-			{
-				head = (head + 1) % 360;
-			}
-			else
-				head = (head - 1) % 360;
-
-		}
-		if (goalH < 0 && head < 0)
-		{
-			if (head - goalH < 0)
-			{
-				if (abs((head - goalH)) % 180 >= 1)
-				{
-					head = (head - 1) % 360;
-				}
-				else
-					head = (head + 1) % 360;
-			}
-			else
-			{
-				if (abs(goalH - head) % 180 > 1)
-					head = (head + 1) % 360;
-				else
-					head = (head - 1) % 360;
-			}
-		}
-	}
+	
 	glutPostRedisplay();
 	glutTimerFunc(refreshMills, timer, 0);
 }
@@ -435,9 +254,9 @@ void heuristicInverseK(float x, float y)
 			}
 		}
 	}
-	goalS = angle1 - 90;
-	goalE = angle2 - angle1;
-	goalH = angle3 - angle2;
+	shoulder = (int)(angle1 - 90)%360;
+	elbow = (int)(angle2 - angle1)%360;
+	head = (int)(angle3 - angle2)%360;
 	
 	
 }
@@ -457,6 +276,10 @@ void keyboard (unsigned char key, int x, int y)
 		case 'c':
 		calc = true;
 		 break;
+		case'v':
+			heuristicInverseK(drawdot_x, drawdot_y);
+			calc = true;
+			 break;
 		case 's':
          shoulder = (shoulder + 1) % 360;
          break;
@@ -517,3 +340,187 @@ int main(int argc, char** argv)
 
    return 0;
 }
+/* Broken animation
+if (goalS != shoulder)
+{
+if (goalS >= 0 && shoulder >= 0)
+{
+if (shoulder - goalS < shoulder)
+{
+if ((shoulder - goalS) % 180 >= 1)
+{
+shoulder = (shoulder - 1) % 360;
+}
+else
+shoulder = (shoulder + 1) % 360;
+}
+else
+{
+if ((goalS - shoulder) % 180 >= 1)
+shoulder = (shoulder + 1) % 360;
+else
+shoulder = (shoulder - 1) % 360;
+}
+}
+if (goalS >= 0 && shoulder < 0)
+{
+if (abs((shoulder - goalS)) % 180 >= 1)
+{
+shoulder = (shoulder - 1) % 360;
+}
+else
+shoulder = (shoulder + 1) % 360;
+
+}
+if (goalS < 0 && shoulder >= 0)
+{
+if (abs((shoulder - goalS)) % 180 >= 1)
+{
+shoulder = (shoulder + 1) % 360;
+}
+else
+shoulder = (shoulder - 1) % 360;
+
+}
+if (goalS < 0 && shoulder < 0)
+{
+if (shoulder - goalS < 0)
+{
+if (abs((shoulder - goalS)) % 180 >= 1)
+{
+shoulder = (shoulder - 1) % 360;
+}
+else
+shoulder = (shoulder + 1) % 360;
+}
+else
+{
+if (abs(goalS - shoulder) % 180 > 1)
+shoulder = (shoulder + 1) % 360;
+else
+shoulder = (shoulder - 1) % 360;
+}
+}
+}
+if (goalE != elbow)
+{
+if (goalE >= 0 && elbow >= 0)
+{
+if (elbow - goalE < elbow)
+{
+if ((elbow - goalE) % 180 >= 1)
+{
+elbow = (elbow - 1) % 360;
+}
+else
+elbow = (elbow + 1) % 360;
+}
+else
+{
+if ((goalE - elbow) % 180 >= 1)
+elbow = (elbow + 1) % 360;
+else
+elbow = (elbow - 1) % 360;
+}
+}
+if (goalE >= 0 && elbow < 0)
+{
+if (abs((elbow - goalE)) % 180 >= 1)
+{
+elbow = (elbow - 1) % 360;
+}
+else
+elbow = (elbow + 1) % 360;
+
+}
+if (goalE < 0 && elbow >= 0)
+{
+if (abs((elbow - goalE)) % 180 >= 1)
+{
+elbow = (elbow + 1) % 360;
+}
+else
+elbow = (elbow - 1) % 360;
+
+}
+if (goalE < 0 && elbow < 0)
+{
+if (elbow - goalE < 0)
+{
+if (abs((elbow - goalE)) % 180 >= 1)
+{
+elbow = (elbow - 1) % 360;
+}
+else
+elbow = (elbow + 1) % 360;
+}
+else
+{
+if (abs(goalE - elbow) % 180 > 1)
+elbow = (elbow + 1) % 360;
+else
+elbow = (elbow - 1) % 360;
+}
+}
+}
+if (goalH != head)
+{
+if (goalH >= 0 && head >= 0)
+{
+if (head - goalH < head)
+{
+if ((head - goalH) % 180 >= 1)
+{
+head = (head - 1) % 360;
+}
+else
+head = (head + 1) % 360;
+}
+else
+{
+if ((goalH - head) % 180 >= 1)
+head = (head + 1) % 360;
+else
+head = (head - 1) % 360;
+}
+}
+if (goalH >= 0 && head < 0)
+{
+if (abs((head - goalH)) % 180 >= 1)
+{
+head = (head - 1) % 360;
+}
+else
+head = (head + 1) % 360;
+
+}
+if (goalH < 0 && head >= 0)
+{
+if (abs((head - goalH)) % 180 >= 1)
+{
+head = (head - 1) % 360;
+}
+else
+head = (head + 1) % 360;
+
+}
+if (goalH < 0 && head < 0)
+{
+if (head - goalH < 0)
+{
+if (abs((head - goalH)) % 180 >= 1)
+{
+head = (head - 1) % 360;
+}
+else
+head = (head + 1) % 360;
+}
+else
+{
+if (abs(goalH - head) % 180 > 1)
+head = (head + 1) % 360;
+else
+head = (head - 1) % 360;
+}
+}
+}*/
