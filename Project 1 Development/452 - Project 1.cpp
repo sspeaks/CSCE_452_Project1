@@ -18,7 +18,7 @@ GLfloat mat2[16];
 GLfloat mat3[16];
 
 GLfloat drawdot_x = 0.0;
-GLfloat drawdot_y = 0.0;
+GLfloat drawdot_y = 2 + 2 * .66 + 2 * .4;
 
 bool calc = false;
 bool inLoop = false;
@@ -300,15 +300,19 @@ void keyboard (unsigned char key, int x, int y)
          break;
 		case 'i':
 			drawdot_y += .05;
+			heuristicInverseK(drawdot_x, drawdot_y);
 			break;
 		case'j':
 			drawdot_x -= .05;
+			heuristicInverseK(drawdot_x, drawdot_y);
 			break;
 		case'k':
 			drawdot_y -= .05;
+			heuristicInverseK(drawdot_x, drawdot_y);
 			break;
 		case 'l':
 			drawdot_x += .05;
+			heuristicInverseK(drawdot_x, drawdot_y);
 			break;
       case 27:
          exit(0);
