@@ -39,6 +39,8 @@ void finalWSACleanup();
 int result;
 SOCKET g_ocket;
 bool setUp;
+bool drawn = false;
+int sleep_val;
 
 #define PI 3.14159265358979323846
 int refreshMills = 15;
@@ -91,6 +93,8 @@ void glui_callback10(int arg);
 void glui_callback11(int arg);
 void glui_callback12(int arg);
 void glui_callback13(int arg);
+void glui_callback14(int arg);
+void glui_callback15(int arg);
 
 //  Tells whether to display the window full screen or not
 int fullScreen = 0;
@@ -315,7 +319,7 @@ int clientLogic(SOCKET mySocket, const sockaddr* connectionAddress)
 		{
 			unsigned long howMuchInBuffer = 0;
 			unsigned long numBytesRead = 0;
-			printf("received: \"");
+			//printf("received: \"");
 			stringstream input;
 			do
 			{
@@ -339,24 +343,26 @@ int clientLogic(SOCKET mySocket, const sockaddr* connectionAddress)
 				}
 				howMuchInBuffer -= result;
 			} while (howMuchInBuffer > 0);
-			printf("\" %d bytes%c", numBytesRead,
-				((numBytesRead != 0) ? '\n' : '\r'));
+			//printf("\" %d bytes%c", numBytesRead,
+				//((numBytesRead != 0) ? '\n' : '\r'));
 			int t;
 			input >> shoulder;
 			input >> elbow;
 			input >> head;
 			input >> t;
+			input >> drawdot_x;
+			input >> drawdot_y;
 			if (t == 1)
 				calc = true;
-			drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
-			drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
+		//	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
+			//drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 			glutPostRedisplay();
 		//	input >> t;
 			//printf("s = %d, e = %d, h = %d, t = %d\n", s, e, h, t);
 		}
 		else
 		{
-			printf("client: \"%s\" %d\r", userTextField, iterations++);
+			//printf("client: \"%s\" %d\r", userTextField, iterations++);
 		}
 	}
 	return EXIT_SUCCESS;
@@ -592,73 +598,102 @@ void processMouse(int button, int state, int x, int y)
 	}
 
 }
+void send_function()
+{
+	stringstream ss;
+	ss << "\0" << shoulder << " " << elbow << " " << head << " " << drawn << " " << drawdot_x << " " <<  drawdot_y;
+	string send_s = ss.str();
+	char userTextField[1024];
+	memcpy(userTextField, send_s.c_str(), send_s.size() * sizeof(char));
+	int userTextFieldCursor = send_s.size();
+	_sleep(sleep_val);
+	result = send(g_ocket, (const char *)userTextField, userTextFieldCursor, 0);
+	if (result == SOCKET_ERROR)
+	{
+		printf("client send() error %d\n", WSAGetLastError());
+	}
+	userTextFieldCursor = 0;
+	userTextField[userTextFieldCursor] = '\0';
+	drawn = false;
+}
 
 void keyboard(unsigned char key, int x, int y)
 {
-	bool drawn = false;
 	switch (key) {
 	case 'c':
+		
 		calc = true;
 		glutPostRedisplay();
 		drawn = true;
 		break;
 	case'v':
+		
 		heuristicInverseK(drawdot_x, drawdot_y);
 		glutPostRedisplay();
 		drawn = true;
 		break;
 	case 's':
+		
 		shoulder = (shoulder + 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'S':
+		
 		shoulder = (shoulder - 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'e':
+		
 		elbow = (elbow + 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'E':
+		
 		elbow = (elbow - 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'h':
+		
 		head = (head + 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'H':
+		
 		head = (head - 1) % 360;
 		drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 		drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 		glutPostRedisplay();
 		break;
 	case 'i':
+		
 		drawdot_y += .05;
 		heuristicInverseK(drawdot_x, drawdot_y);
 		glutPostRedisplay();
 		break;
 	case'j':
+		
 		drawdot_x -= .05;
 		heuristicInverseK(drawdot_x, drawdot_y);
 		glutPostRedisplay();
 		break;
 	case'k':
+		
 		drawdot_y -= .05;
 		heuristicInverseK(drawdot_x, drawdot_y);
 		glutPostRedisplay();
 		break;
 	case 'l':
+		
 		drawdot_x += .05;
 		heuristicInverseK(drawdot_x, drawdot_y);
 		glutPostRedisplay();
@@ -669,22 +704,10 @@ void keyboard(unsigned char key, int x, int y)
 	default:
 		break;
 	}
-
-	stringstream ss;
-	ss << "\0" << shoulder << " " << elbow << " " << head << " " << drawn;
-	string send_s = ss.str();
-	char userTextField[1024];
-	memcpy(userTextField, send_s.c_str(), send_s.size() * sizeof(char));
-	int userTextFieldCursor = send_s.size();
-	result = send(g_ocket, (const char *)userTextField, userTextFieldCursor, 0);
-	if (result == SOCKET_ERROR)
-	{
-		printf("client send() error %d\n", WSAGetLastError());
-	}
-	userTextFieldCursor = 0;
-	userTextField[userTextFieldCursor] = '\0';
-	drawn = false;
+	send_function();
 }
+
+
 
 
 void reshape(int w, int h)
@@ -737,89 +760,128 @@ void setupGLUI()
 	glui_subwindow->add_button(" +Y ", 10, glui_callback11);
 	glui_subwindow->add_button(" -Y ", 11, glui_callback12);
 	glui_subwindow->add_button("seek", 12, glui_callback13);
+	glui_subwindow->add_button("Delay", 13, glui_callback14);
+	glui_subwindow->add_button("No Delay", 14, glui_callback15);
 	glui_subwindow->add_button(" QUIT ", 7, glui_callback8);
+
 
 	// ***** End of Define glui subwindow (s) *****/
 }
 
 void glui_callback(int arg)
 {
+	
 	shoulder = (shoulder + 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
+
 }
 void glui_callback2(int arg)
 {
+	
 	shoulder = (shoulder - 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
+
 }
 void glui_callback3(int arg)
 {
+	
 	elbow = (elbow + 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback4(int arg)
 {
+	
 	elbow = (elbow - 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback5(int arg)
 {
+	
 	head = (head + 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback6(int arg)
 {
+	
 	head = (head - 1) % 360;
 	drawdot_x = cos((shoulder + 90)*PI / 180) * 2 + cos((elbow + shoulder + 90)*PI / 180) * 1.32 + cos((head + elbow + shoulder + 90)*PI / 180) * .8;
 	drawdot_y = sin((shoulder + 90)*PI / 180) * 2 + sin((elbow + shoulder + 90)*PI / 180) * 1.32 + sin((head + elbow + shoulder + 90)*PI / 180) * .8;
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback7(int arg)
 {
+	
 	calc = true;
+	drawn = true;
 	glutPostRedisplay();
+	send_function();
+
 }
 void glui_callback8(int arg)
 {
+	
 	exit(1);
+	send_function();
 }
 void glui_callback9(int arg)
 {
+	
 	drawdot_x += .05;
 	heuristicInverseK(drawdot_x, drawdot_y);
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback10(int arg)
 {
+	
 	drawdot_x -= .05;
 	heuristicInverseK(drawdot_x, drawdot_y);
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback11(int arg)
 {
+	
 	drawdot_y += .05;
 	heuristicInverseK(drawdot_x, drawdot_y);
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback12(int arg)
 {
+	
 	drawdot_y -= .05;
 	heuristicInverseK(drawdot_x, drawdot_y);
 	glutPostRedisplay();
+	send_function();
 }
 void glui_callback13(int arg){
+	
 	heuristicInverseK(drawdot_x, drawdot_y);
 	glutPostRedisplay();
+	send_function();
+}
+void glui_callback14(int arg){
+	sleep_val = 2000;
+}
+void glui_callback15(int arg){
+	sleep_val = 0;
 }
 
 
