@@ -18,6 +18,7 @@ public class SPath {
 	SPathPanel pane;
 	ArrayList<Box> list = new ArrayList<Box>();
 	ArrayList<Node> points;
+	ArrayList<Node> visited;
 	int boxNum;
 	int initX, initY;
 	int initCenterX, initCenterY;
@@ -42,7 +43,7 @@ public class SPath {
 
 	public ArrayList<Node> solve() {
 
-		ArrayList<Node> visited = new ArrayList<Node>();
+		visited = new ArrayList<Node>();
 
 		HashMap<Node, Node> cameFrom = new HashMap<Node, Node>();
 		Node curNode = new Node(startcoors[0], startcoors[1]);
@@ -54,7 +55,6 @@ public class SPath {
 		while (!queue.isEmpty()) {
 
 			// System.out.println("queue size is " + queue.size());
-			double min = 500;
 			/*
 			 * for(Node n : queue) { if( min > n.f_x()) { min = n.f_x(); } }
 			 */
@@ -233,7 +233,7 @@ public class SPath {
 				tested = true;
 				}
 				g.setColor(Color.BLUE);
-				for (Node n : queue) {
+				for (Node n : visited) {
 					g.fillOval(n.x, n.y, 5, 5);
 				}
 				if (points != null) {
@@ -289,12 +289,14 @@ public class SPath {
 					if (!startDraw) {
 						startcoors[0] = e.getX();
 						startcoors[1] = e.getY();
+						tested = false;
 						pane.repaint();
 						startDraw = true;
 					} else if (!endDraw) {
 						endcoors[0] = e.getX();
 						endcoors[1] = e.getY();
 						endDraw = true;
+						tested = false;
 						pane.repaint();
 					} else {
 						startDraw = false;
@@ -303,6 +305,7 @@ public class SPath {
 						startcoors[1] = e.getY();
 						startDraw = true;
 						queue.clear();
+						visited.clear();
 						tested = false;
 						points.clear();
 						pane.repaint();
@@ -370,25 +373,25 @@ public class SPath {
 		ArrayList<Node> neigh = new ArrayList<Node>();
 		int i = 0;
 		Node temp;
-		boolean aff = true;/*
-							 * for(i = 0; i < list.size(); i++) {
-							 * if(list.get(i).checkCollision(x+1, y+1)) aff =
-							 * false; } if(aff) { temp = new Node(x+1, y+1);
-							 * temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
-							 * } aff = true; for(i = 0; i < list.size(); i++) {
-							 * if(list.get(i).checkCollision(x-1, y+1)) aff =
-							 * false; } if(aff) { temp = new Node(x-1, y+1);
-							 * temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
-							 * } aff = true; for(i = 0; i < list.size(); i++) {
-							 * if(list.get(i).checkCollision(x+1, y-1)) aff =
-							 * false; } if(aff) { temp = new Node(x+1, y-1);
-							 * temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
-							 * } aff = true; for(i = 0; i < list.size(); i++) {
-							 * if(list.get(i).checkCollision(x-1, y-1)) aff =
-							 * false; } if(aff) { temp = new Node(x-1, y-1);
-							 * temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
-							 * } aff = true;
-							 */
+		boolean aff = true;
+							  for(i = 0; i < list.size(); i++) {
+							  if(list.get(i).checkCollision(x+1, y+1)) aff =
+							  false; } if(aff) { temp = new Node(x+1, y+1);
+							  temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
+							  } aff = true; for(i = 0; i < list.size(); i++) {
+							  if(list.get(i).checkCollision(x-1, y+1)) aff =
+							  false; } if(aff) { temp = new Node(x-1, y+1);
+							  temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
+							  } aff = true; for(i = 0; i < list.size(); i++) {
+							  if(list.get(i).checkCollision(x+1, y-1)) aff =
+							  false; } if(aff) { temp = new Node(x+1, y-1);
+							  temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
+							  } aff = true; for(i = 0; i < list.size(); i++) {
+							  if(list.get(i).checkCollision(x-1, y-1)) aff =
+							  false; } if(aff) { temp = new Node(x-1, y-1);
+							  temp.g_x = Math.sqrt(2) + n.g_x; neigh.add(temp);
+							  } aff = true;
+							 
 		for (i = 0; i < list.size(); i++) {
 			if (list.get(i).checkCollision(x, y + 1))
 				aff = false;
@@ -439,7 +442,7 @@ public class SPath {
 				+ Math.pow(endcoors[1] - y, 2));
 	}
 
-	public class Node implements Comparable {
+	public class Node implements Comparable<Object> {
 		double h_x; // Distance from goal
 		double g_x; // Distance Traveled
 		int x, y;
@@ -447,8 +450,8 @@ public class SPath {
 		public Node(int x, int y) {
 			this.x = x;
 			this.y = y;
-			h_x = Math.abs(x - endcoors[0]) + Math.abs(y - endcoors[1]);
-			h_x *= (1 + 1/500);
+			h_x = /*Math.abs(x - endcoors[0]) + Math.abs(y - endcoors[1]);*/ dist(x,y);
+			h_x *= (1 + 1/10);
 			g_x = -1;
 		}
 
