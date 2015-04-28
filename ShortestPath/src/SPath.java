@@ -17,6 +17,7 @@ public class SPath {
 
 	SPathPanel pane;
 	ArrayList<Box> list = new ArrayList<Box>();
+	ArrayList<Node> points;
 	int boxNum;
 	int initX, initY;
 	int initCenterX, initCenterY;
@@ -25,6 +26,7 @@ public class SPath {
 	NodeComparator comp = new NodeComparator();
 	PriorityQueue<Node> queue = new PriorityQueue<Node>(comp);
 	boolean startDraw = false, endDraw = false;
+	boolean tested = false;
 
 	public SPath() throws InterruptedException {
 		Box boxOne = new Box(200, 200, 110, 150);
@@ -49,7 +51,7 @@ public class SPath {
 
 		double t_g;
 
-		while (!queue.isEmpty() && queue.size() < 1000) {
+		while (!queue.isEmpty()) {
 
 			// System.out.println("queue size is " + queue.size());
 			double min = 500;
@@ -76,7 +78,6 @@ public class SPath {
 						cameFrom.put(n, curNode);
 						n.g_x = t_g;
 						queue.add(n);
-						pane.repaint();
 					} else {
 						for (Node v : queue) {
 							if (v.x == n.x && v.y == n.y) {
@@ -86,7 +87,6 @@ public class SPath {
 
 									if (!queue.contains(n)) {
 										queue.add(n);
-										pane.repaint();
 									}
 								}
 							}
@@ -227,7 +227,11 @@ public class SPath {
 			}
 
 			if (startDraw && endDraw) {
-				ArrayList<Node> points = solve();
+				if(tested == false)
+				{
+				points = solve();
+				tested = true;
+				}
 				g.setColor(Color.BLUE);
 				for (Node n : queue) {
 					g.fillOval(n.x, n.y, 5, 5);
@@ -237,9 +241,9 @@ public class SPath {
 					for (Node n : points) {
 						g.fillOval(n.x, n.y, 5, 5);
 					}
-					queue.clear();
 				}
 			}
+			pane.repaint();
 
 		}
 
@@ -298,6 +302,9 @@ public class SPath {
 						startcoors[0] = e.getX();
 						startcoors[1] = e.getY();
 						startDraw = true;
+						queue.clear();
+						tested = false;
+						points.clear();
 						pane.repaint();
 					}
 
@@ -440,7 +447,8 @@ public class SPath {
 		public Node(int x, int y) {
 			this.x = x;
 			this.y = y;
-			h_x = dist(x, y);
+			h_x = Math.abs(x - endcoors[0]) + Math.abs(y - endcoors[1]);
+			h_x *= (1 + 1/500);
 			g_x = -1;
 		}
 
